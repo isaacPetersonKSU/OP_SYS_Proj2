@@ -35,7 +35,7 @@ class GradeEnvironment : public testing::Environment
 };
 
 TEST (TestSuitename, importPCB){
-    EXPECT_NE(NULL, load_process_control_blocks("../pcb.bin"));
+    EXPECT_NE(nullptr, load_process_control_blocks("../pcb.bin"));
 }
 
 int main(int argc, char **argv) 

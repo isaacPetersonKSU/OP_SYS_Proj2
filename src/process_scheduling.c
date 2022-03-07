@@ -55,13 +55,13 @@ dyn_array_t *load_process_control_blocks(const char *input_file)
     ProcessControlBlock_t *myPCB;
     fread(&nprocesses, sizeof(uint32_t), 1, fp);
     myPCB = (ProcessControlBlock_t *) malloc(nprocesses * sizeof(ProcessControlBlock_t));
-    for(int i = 0; i < nprocesses; i++) {
+    for(uint32_t i = 0; i < nprocesses; i++) {
         fread(&myPCB[i].remaining_burst_time, sizeof(uint32_t), 1, fp);
         fread(&myPCB[i].priority, sizeof(uint32_t), 1, fp);
         fread(&myPCB[i].arrival, sizeof(uint32_t), 1, fp);
-        printf("myPCB at %d remaining bust time: %s\n", i, myPCB[i].remaining_burst_time);
-        printf("myPCB at %d priority: %s\n", i, myPCB[i].priority);
-        printf("myPCB at %d arrival: %s\n", i, myPCB[i].arrival);
+        printf("myPCB at %d remaining bust time: %d\n", i, myPCB[i].remaining_burst_time);
+        printf("myPCB at %d priority: %d\n", i, myPCB[i].priority);
+        printf("myPCB at %d arrival: %d\n", i, myPCB[i].arrival);
     }
     return dyn_array_import(myPCB, nprocesses, sizeof(ProcessControlBlock_t), NULL);
 }
