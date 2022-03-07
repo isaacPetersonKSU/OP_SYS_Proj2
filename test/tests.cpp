@@ -34,6 +34,9 @@ class GradeEnvironment : public testing::Environment
         }
 };
 
+TEST (TestSuitename, importPCB){
+    EXPECT_NE(NULL, load_process_control_blocks("../pcb.bin"));
+}
 
 int main(int argc, char **argv) 
 {
@@ -41,3 +44,4 @@ int main(int argc, char **argv)
     ::testing::AddGlobalTestEnvironment(new GradeEnvironment);
     return RUN_ALL_TESTS();
 }
+
