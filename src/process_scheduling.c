@@ -49,8 +49,12 @@ bool round_robin(dyn_array_t *ready_queue, ScheduleResult_t *result, size_t quan
 
 dyn_array_t *load_process_control_blocks(const char *input_file) 
 {
+    if (input_file == NULL) return NULL;
+
     FILE *fp;
     fp = fopen(input_file, "r");
+    if (fp == NULL) return NULL;
+    
     uint32_t nprocesses;
     ProcessControlBlock_t *myPCB;
     fread(&nprocesses, sizeof(uint32_t), 1, fp);
