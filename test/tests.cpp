@@ -35,9 +35,13 @@ class GradeEnvironment : public testing::Environment
 };
 
 TEST (process_scheduling, loadPCB){
-    EXPECT_NE(nullptr, load_process_control_blocks("../pcb.bin"));
     EXPECT_EQ(nullptr, load_process_control_blocks(NULL));
     EXPECT_EQ(nullptr, load_process_control_blocks("doesnotexist.txt"));
+    
+    dyn_array_t *pcb = load_process_control_blocks("../pcb.bin");
+    EXPECT_NE(nullptr, pcb);
+    
+    // test individual values
 }
 
 int main(int argc, char **argv) 
