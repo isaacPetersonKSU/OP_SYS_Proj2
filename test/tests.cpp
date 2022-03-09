@@ -44,6 +44,14 @@ TEST (process_scheduling, loadPCB){
     // test individual values
 }
 
+TEST (proces_scheduling, FCFS_validate_input){
+    dyn_array_t * arrayPtr = dyn_array_create(0,0,NULL);
+    ScheduleResult_t result;
+    EXPECT_EQ(false, first_come_first_serve(NULL, &result));
+    EXPECT_EQ(false, first_come_first_serve(arrayPtr, NULL));
+    EXPECT_EQ(true, first_come_first_serve(arrayPtr, &result));
+}
+
 int main(int argc, char **argv) 
 {
     ::testing::InitGoogleTest(&argc, argv);
