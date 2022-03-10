@@ -74,15 +74,12 @@ TEST (process_scheduling, PRI_validate_input)
 
 TEST (process_scheduling, RR_validate_input)
 {
-    /* 
-    1 was used as a placeholder quantum. i dont think this is right
-    */
     dyn_array_t * arrayPtr = dyn_array_create(0,0,NULL);
     ScheduleResult_t result;
-    EXPECT_FALSE(round_robin(nullptr, &result, 1));
-    EXPECT_FALSE(round_robin(arrayPtr, nullptr, 1));
+    EXPECT_FALSE(round_robin(nullptr, &result, QUANTUM));
+    EXPECT_FALSE(round_robin(arrayPtr, nullptr, QUANTUM));
     EXPECT_FALSE(round_robin(arrayPtr, &result, 0));
-    EXPECT_TRUE(round_robin(arrayPtr, &result, 1));
+    EXPECT_TRUE(round_robin(arrayPtr, &result, QUANTUM));
 }
 
 TEST (process_scheduling, SRTF_validate_input)
