@@ -33,4 +33,4 @@ add_executable(${PROJECT_NAME}_test test/tests.cpp)
 target_compile_definitions(${PROJECT_NAME}_test PRIVATE)
 
 # Link ${PROJECT_NAME}_test with dyn_array and gtest and pthread libraries
-target_link_libraries(${PROJECT_NAME}_test gtest pthread dyn_array process_scheduling test)
+target_link_libraries(${PROJECT_NAME}_test gtest pthread dyn_array process_scheduling)
