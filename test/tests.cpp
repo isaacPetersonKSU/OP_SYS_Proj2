@@ -34,7 +34,8 @@ class GradeEnvironment : public testing::Environment
         }
 };
 
-TEST (process_scheduling, loadPCB){
+TEST (process_scheduling, loadPCB)
+{
     EXPECT_EQ(nullptr, load_process_control_blocks(NULL));
     EXPECT_EQ(nullptr, load_process_control_blocks("doesnotexist.txt"));
     
@@ -44,12 +45,53 @@ TEST (process_scheduling, loadPCB){
     // test individual values
 }
 
-TEST (proces_scheduling, FCFS_validate_input){
+TEST (process_scheduling, FCFS_validate_input)
+{
     dyn_array_t * arrayPtr = dyn_array_create(0,0,NULL);
     ScheduleResult_t result;
-    EXPECT_EQ(false, first_come_first_serve(NULL, &result));
-    EXPECT_EQ(false, first_come_first_serve(arrayPtr, NULL));
-    EXPECT_EQ(true, first_come_first_serve(arrayPtr, &result));
+    EXPECT_FALSE(first_come_first_serve(nullptr, &result));
+    EXPECT_FALSE(first_come_first_serve(arrayPtr, nullptr));
+    EXPECT_TRUE(first_come_first_serve(arrayPtr, &result));
+}
+
+TEST (process_scheduling, SJF_validate_input)
+{
+    dyn_array_t * arrayPtr = dyn_array_create(0,0,NULL);
+    ScheduleResult_t result;
+    EXPECT_FALSE(shortest_job_first(nullptr, &result));
+    EXPECT_FALSE(shortest_job_first(arrayPtr, nullptr));
+    EXPECT_TRUE(shortest_job_first(arrayPtr, &result));
+}
+
+TEST (process_scheduling, PRI_validate_input)
+{
+    dyn_array_t * arrayPtr = dyn_array_create(0,0,NULL);
+    ScheduleResult_t result;
+    EXPECT_FALSE(priority(nullptr, &result));
+    EXPECT_FALSE(priority(arrayPtr, nullptr));
+    EXPECT_TRUE(priority(arrayPtr, &result));
+}
+
+TEST (process_scheduling, RR_validate_input)
+{
+    /* 
+    1 was used as a placeholder quantum. i dont think this is right
+    */
+    dyn_array_t * arrayPtr = dyn_array_create(0,0,NULL);
+    ScheduleResult_t result;
+    EXPECT_FALSE(round_robin(nullptr, &result, 1));
+    EXPECT_FALSE(round_robin(arrayPtr, nullptr, 1));
+    EXPECT_FALSE(round_robin(arrayPtr, &result, 0));
+    EXPECT_TRUE(round_robin(arrayPtr, &result, 1));
+}
+
+TEST (process_scheduling, SRTF_validate_input)
+{
+    dyn_array_t * arrayPtr = dyn_array_create(0,0,NULL);
+    ScheduleResult_t result;
+    EXPECT_FALSE(shortest_remaining_time_first(nullptr, &result));
+    EXPECT_FALSE(shortest_remaining_time_first(arrayPtr, nullptr));
+    EXPECT_TRUE(shortest_remaining_time_first(arrayPtr, &result));
 }
 
 int main(int argc, char **argv) 
