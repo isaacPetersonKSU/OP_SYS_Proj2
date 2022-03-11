@@ -4,6 +4,8 @@
 #include <pthread.h>
 #include "../include/processing_scheduling.h"
 
+
+
 // Using a C library requires extern "C" to prevent function managling
 extern "C" 
 {
@@ -34,15 +36,24 @@ class GradeEnvironment : public testing::Environment
         }
 };
 
-TEST (process_scheduling, loadPCB)
+TEST(loadPCB, nullString)
 {
     EXPECT_EQ(nullptr, load_process_control_blocks(NULL));
+}
+
+TEST(loadPCB, noFile)
+{
     EXPECT_EQ(nullptr, load_process_control_blocks("doesnotexist.txt"));
-    
-    dyn_array_t *pcb = load_process_control_blocks("../pcb.bin");
-    EXPECT_NE(nullptr, pcb);
-    
-    // test individual values
+}
+
+TEST(loadPCB, emptyfile)
+{
+    ASSERT_EQ(nullptr, load_process_control_blocks("../empty.bin"));
+}
+
+TEST (loadPCB, valid)
+{
+    EXPECT_NE(nullptr, load_process_control_blocks("../pcb.bin"));
 }
 
 TEST (process_scheduling, FCFS_validate_input)

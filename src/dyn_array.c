@@ -6,15 +6,7 @@
 // these are just ideas
 // typedef enum {NONE = 0x00, SHRUNK = 0x01, SORTED = 0x02, ALL = 0xFF} DYN_FLAGS;
 
-struct dyn_array 
-{
-    // DYN_FLAGS flags;
-    size_t capacity;
-    size_t size;
-    const size_t data_size;
-    void *array;
-    void (*destructor)(void *);
-};
+
 
 // Supports 64bit+ size_t!
 // Semi-arbitrary cap on contents. We'll run out of memory before this happens anyway.

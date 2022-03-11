@@ -16,6 +16,16 @@ typedef struct dyn_array dyn_array_t;
 // Erase_n
 // etc
 
+struct dyn_array 
+{
+    // DYN_FLAGS flags;
+    size_t capacity;
+    size_t size;
+    const size_t data_size;
+    void *array;
+    void (*destructor)(void *);
+};
+
 /*
     Destructor notes!
 
