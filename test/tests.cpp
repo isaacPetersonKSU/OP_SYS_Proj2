@@ -4,6 +4,8 @@
 #include <pthread.h>
 #include "../include/processing_scheduling.h"
 
+
+
 // Using a C library requires extern "C" to prevent function managling
 extern "C" 
 {
@@ -39,6 +41,7 @@ class GradeEnvironment : public testing::Environment
         }
 };
 
+<<<<<<< HEAD
 
 /*
     // Reads the PCB burst time values from the binary file into ProcessControlBlock_t remaining_burst_time field
@@ -47,19 +50,35 @@ class GradeEnvironment : public testing::Environment
     // \return a populated dyn_array of ProcessControlBlocks if function ran successful else NULL for an error
     dyn_array_t *load_process_control_blocks(const char *input_file);
 */
+=======
+>>>>>>> main
 TEST(loadPCB, nullString)
 {
     EXPECT_EQ(nullptr, load_process_control_blocks(NULL));
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> main
 TEST(loadPCB, noFile)
 {
     EXPECT_EQ(nullptr, load_process_control_blocks("doesnotexist.txt"));
 }
+<<<<<<< HEAD
 TEST(loadPCB, emptyFile)
 {
     ASSERT_EQ(nullptr, load_process_control_blocks("../empty.bin"));
 }
 TEST (loadPCB, validPerams)
+=======
+
+TEST(loadPCB, emptyfile)
+{
+    ASSERT_EQ(nullptr, load_process_control_blocks("../empty.bin"));
+}
+
+TEST (loadPCB, valid)
+>>>>>>> main
 {
     EXPECT_NE(nullptr, load_process_control_blocks("../pcb.bin"));
 }
