@@ -13,6 +13,8 @@ struct dyn_array
     size_t size;
     const size_t data_size;
     void *array;
+    // might want to add a nprocesses int to keep track of the number of processes
+    size_t nprocesses;
     void (*destructor)(void *);
 };
 
@@ -46,7 +48,7 @@ bool dyn_shift_remove(dyn_array_t *const dyn_array, const size_t position, const
 
 
 
-dyn_array_t *dyn_array_create(const size_t capacity, const size_t data_type_size, void (*destruct_func)(void *)) 
+dyn_array_t *dyn_array_create(const size_t capacity, const size_t data_type_size, const size_t nprocesses, void (*destruct_func)(void *)) 
 {
     if (data_type_size && capacity <= DYN_MAX_CAPACITY) 
     {
@@ -71,7 +73,7 @@ dyn_array_t *dyn_array_create(const size_t capacity, const size_t data_type_size
             // I had an idea... and it compiles
             // const members of a malloc'd struct are so annoying
             memcpy(dyn_array, &((dyn_array_t){actual_capacity, 0, data_type_size,
-                                              malloc(data_type_size * actual_capacity), destruct_func}),
+                                              malloc(data_type_size * actual_capacity), nprocesses, destruct_func}),
                    sizeof(dyn_array_t));
 
             if (dyn_array->array) 
@@ -88,14 +90,14 @@ dyn_array_t *dyn_array_create(const size_t capacity, const size_t data_type_size
 
 // Creates a dynamic array from a standard array
 dyn_array_t *dyn_array_import(const void *const data, const size_t count, const size_t data_type_size,
-                              void (*destruct_func)(void *)) 
+                              const size_t nprocesses, void (*destruct_func)(void *)) 
 {
     // literally could not give us an overlapping pointer unless they guessed it
     // I'd just do a memcpy here instead of dyn_shift, but the dyn_shift branch for this is
     // short. DYN_SHIFT CANNOT fail if create worked properly, but we'll cleanup if it did anyway
     if (data && count) 
     {
-        dyn_array_t *dyn_array = dyn_array_create(count, data_type_size, destruct_func);
+        dyn_array_t *dyn_array = dyn_array_create(count, data_type_size, nprocesses, destruct_func);
         if (dyn_array) 
         {
             if (dyn_shift_insert(dyn_array, 0, count, MODE_INSERT, data)) 

@@ -17,6 +17,7 @@ extern "C"
         uint32_t priority;				// The priority of the task
         uint32_t arrival;				// Time the process arrived in the ready queue
         bool started;              	    // If it has been activated on virtual CPU
+        // might want to add a burst_time uint32 to keep track of total burst time
     } 
     ProcessControlBlock_t;		        // you may or may not need to add more elements
 

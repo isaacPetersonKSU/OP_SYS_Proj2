@@ -34,14 +34,55 @@ class GradeEnvironment : public testing::Environment
         }
 };
 
+/*
+TEST(load_pcb_valid, validfile) {
+    const char * pcbfile = "mypcbfile.bin";
+    int n = 3;
+
+    FILE * fp = fopen(pcbfile, "rw");
+    // creating our own pcb file
+    [
+    fwrite(n, ...)
+
+    fwrite(10, ...)
+    fwrite(0, ...)
+    fwrite(0, ...)
+
+    fwrite(5, ...)
+    fwrite(0, ...)
+    fwrite(15, ...)
+
+    fclose();
+    ]
+
+    [
+        uint32_t array[] = {3, 10, 0, 0, 20, 0 , 1, 5, 0, 2};
+        fwrite(array, sizeof(array), 1, fp);
+    ]
+
+    dyn_array_t * d = load_process_control_blocks(pcbfile);
+    ASSERT_NE(d, NULL);
+
+    // check d->capacity
+    // traverse trhough d->array and see if it is properly loaded
+    // check d->data_size
+
+    // if not right, don't add points
+}
+
+*/
+
+// One bad parameter for each algorithm and then one valid test case for each algorithm
 TEST (process_scheduling, loadPCB)
 {
+    // read, if return value is 0, then there is no data. if there is not enough processes, then it should fail as well
     EXPECT_EQ(nullptr, load_process_control_blocks(NULL));
     EXPECT_EQ(nullptr, load_process_control_blocks("doesnotexist.txt"));
     
     dyn_array_t *pcb = load_process_control_blocks("../pcb.bin");
     EXPECT_NE(nullptr, pcb);
     
+    // Add score?
     // test individual values
 }
 
