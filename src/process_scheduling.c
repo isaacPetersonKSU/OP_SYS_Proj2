@@ -20,22 +20,35 @@ void virtual_cpu(ProcessControlBlock_t *process_control_block)
 
 bool first_come_first_serve(dyn_array_t *ready_queue, ScheduleResult_t *result) 
 {
-    if(ready_queue == NULL)
+    if(ready_queue == NULL || result == NULL) return false;
+    
+    uint32 firstArrival = UINT32_MAX;
+    uint32_t n = dyn_array_size(ready_queue);
+    for(int i = 0; i < n; i++)
     {
-        printf("null queue pointer\n");
-        return false;
+
+        for(int j = i + 1; j++)
+        {
+            
+        }
+
+        process_control_block_t * block = dyn_array_at(ready_queue, n);
+        if(block->remaining_burst_time > 0 && block->arival < nextUp.arrival)
+        {
+            nextUp = block;
+            firstArrival = nextUp->arrival;
+        }
     }
-    if(result == NULL)
-    {
-        printf("results pointer null\n");
-        return false;
-    }
+    } 
+    while(n > 0)
+    
     return true;
 }
 
 bool shortest_job_first(dyn_array_t *ready_queue, ScheduleResult_t *result) 
 {
     if(ready_queue == NULL || result == NULL) return false;
+
     return true;   
 }
 
