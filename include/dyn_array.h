@@ -11,7 +11,16 @@
 #include <string.h>
 #include <stdint.h>
 
-typedef struct dyn_array dyn_array_t;
+typedef struct dyn_array 
+{
+  // DYN_FLAGS flags;
+  size_t capacity;
+  size_t size;
+  const size_t data_size;
+  void *array;
+  void (*destructor)(void *);
+}dyn_array_t;
+
 // Next version, push/pop_N_back/front for bulk loading
 // Erase_n
 // etc

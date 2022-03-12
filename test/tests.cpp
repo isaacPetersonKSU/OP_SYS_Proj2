@@ -17,6 +17,8 @@ extern "C"
 unsigned int score;
 unsigned int total;
 
+dyn_array_t* ready_queue = load_process_control_blocks("../pcb.bin");
+
 class GradeEnvironment : public testing::Environment 
 {
     public:
@@ -45,11 +47,11 @@ TEST (process_scheduling, loadPCB){
 }
 
 TEST (proces_scheduling, FCFS_validate_input){
-    dyn_array_t * arrayPtr = dyn_array_create(0,0,NULL);
     ScheduleResult_t result;
-    EXPECT_EQ(false, first_come_first_serve(NULL, &result));
-    EXPECT_EQ(false, first_come_first_serve(arrayPtr, NULL));
-    EXPECT_EQ(true, first_come_first_serve(arrayPtr, &result));
+    first_come_first_serve(ready_queue, &result);
+    EXPECT_EQ(50, result.total_run_time);
+    EXPECT_EQ(17.5, result.average_waiting_time);
+    EXPECT_EQ(30, result.average_turnaround_time);
 }
 
 int main(int argc, char **argv) 

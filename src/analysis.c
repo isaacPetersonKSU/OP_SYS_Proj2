@@ -19,7 +19,16 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
-    abort();  // replace me with implementation.
+    dyn_array_t* ready_queue = load_process_control_blocks(argv[1]);
+    ScheduleResult_t result = {0,0,0};
+
+    if (!ready_queue) return -1;
+
+    if (strcmp(argv[2], FCFS) == 0){
+        first_come_first_serve(ready_queue, &result);
+    }
+
+    // fprintf something
 
     return EXIT_SUCCESS;
 }
