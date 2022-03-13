@@ -11,15 +11,15 @@
 #include "dyn_array.h"
 #include "processing_scheduling.h"
 
-#define TIMESTAMP_MSG "%d-%02d-%02d %02d:%02d:%02d\t"
+#define TIMESTAMP_MSG "%d-%02d-%02d %02d:%02d:%02d\n"
 
-#define FCFS_SUCCESS_MSG "First Come First Serve Analysis:\n"
-#define SJF_SUCCESS_MSG "Shortest Job First Analysis:\n"
-#define RR_SUCCESS_MSG "Round Robin Analysis:\n"
-#define SRTF_SUCCESS_MSG "Shortest Remaining Time First Analysis:\n"
+#define FCFS_SUCCESS_MSG "\tFirst Come First Serve Analysis:\n"
+#define SJF_SUCCESS_MSG "\tShortest Job First Analysis:\n"
+#define RR_SUCCESS_MSG "\tRound Robin Analysis:\n"
+#define SRTF_SUCCESS_MSG "\tShortest Remaining Time First Analysis:\n"
 
 #define RESULTS_MSG "\tWaiting Time - %f, Turnaround Time - %f, Total Time - %lu\n"
-#define FAIL_MSG "unable to perform algorithm\n"
+#define FAIL_MSG "\tunable to perform algorithm\n"
 
 enum algorithm { invalid, FCFS, SJF, RR, SRTF};
 
