@@ -52,6 +52,7 @@ int metaDataOutput(char* filePath, enum algorithm al, ScheduleResult_t * result)
             break;
         default:
             fprintf(metaData, FAIL_MSG);
+            printf(FAIL_MSG);
             fclose(metaData);
             free(result);
             return 0;
@@ -60,19 +61,19 @@ int metaDataOutput(char* filePath, enum algorithm al, ScheduleResult_t * result)
     fprintf(metaData, RESULTS_MSG, result->average_waiting_time, result->average_turnaround_time, result->total_run_time);
     fclose(metaData);
     free(result);
+    printf("results written in file\n");
     return 1;
 }
 
 // Add and comment your analysis code in this function.
 int main(int argc, char **argv) 
 {
-    if (argc < 3) 
+    if (argc < 3 || argc > 4) 
     {
         printf("%s <pcb file> <schedule algorithme> [quantum]\n", argv[0]);
         return EXIT_FAILURE;
     }
-
-    int quantum = atoi(argv[3]);
+    
     dyn_array_t * ready_queue = load_process_control_blocks(argv[1]);
     if (ready_queue == 0) return EXIT_FAILURE;
     ScheduleResult_t * result = calloc(1, sizeof(ScheduleResult_t));
@@ -80,7 +81,8 @@ int main(int argc, char **argv)
     enum algorithm al = 0;
     if (!strcmp(argv[2], "FCFS") && first_come_first_serve(ready_queue, result)) al = FCFS;
     else if (!strcmp(argv[2], "SJF") && shortest_job_first(ready_queue, result)) al = SJF;
-    else if (!strcmp(argv[2], "RR") && round_robin(ready_queue, result, quantum)) al = RR;
+    else if (!strcmp(argv[2], "RR") && argc == 4 && round_robin(ready_queue, result, atoi(argv[3]))) al = RR;
+
     else if (!strcmp(argv[2], "SRTF") && shortest_remaining_time_first(ready_queue, result)) al = SRTF;
 
     return metaDataOutput("../readme.md", al, result);
