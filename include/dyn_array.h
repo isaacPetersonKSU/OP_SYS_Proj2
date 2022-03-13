@@ -23,6 +23,7 @@ struct dyn_array
     size_t size;
     const size_t data_size;
     void *array;
+    size_t nprocesses; // Adding nprocesses to easily keep track of the number of processes
     void (*destructor)(void *);
 };
 
@@ -81,9 +82,6 @@ const void *dyn_array_export(const dyn_array_t *const dyn_array);
 ///
 void dyn_array_destroy(dyn_array_t *const dyn_array);
 
-
-
-
 // Prefer the X_back functions if you use a lot of push/pop operations
 // because, duh, it's an array and arrays don't handle front operations well
 
@@ -123,8 +121,6 @@ bool dyn_array_pop_front(dyn_array_t *const dyn_array);
 ///
 bool dyn_array_extract_front(dyn_array_t *const dyn_array, void *const object);
 
-
-
 ///
 /// Returns a pointer to the object at the end of the array
 /// \param dyn_array the dynamic array
@@ -155,7 +151,6 @@ bool dyn_array_pop_back(dyn_array_t *const dyn_array);
 /// \return bool representing success of the operation
 ///
 bool dyn_array_extract_back(dyn_array_t *const dyn_array, void *const object);
-
 
 ///
 /// Returns a pointer to the desired object in the array
@@ -193,7 +188,6 @@ bool dyn_array_erase(dyn_array_t *const dyn_array, const size_t index);
 /// \return bool representing success of the operation
 ///
 bool dyn_array_extract(dyn_array_t *const dyn_array, const size_t index, void *const object);
-
 
 ///
 /// Removes and optionally destructs all array elements
@@ -241,7 +235,6 @@ size_t dyn_array_data_size(const dyn_array_t *const dyn_array);
 ///
 bool dyn_array_sort(dyn_array_t *const dyn_array, int (*const compare)(const void *, const void *));
 
-
 ///
 /// Inserts the given object into the correct sorted position
 ///  increasing the container size by one
@@ -254,7 +247,6 @@ bool dyn_array_sort(dyn_array_t *const dyn_array, int (*const compare)(const voi
 ///
 bool dyn_array_insert_sorted(dyn_array_t *const dyn_array, const void *const object,
                              int (*const compare)(const void *const, const void *const));
-
 
 ///
 /// Applies the given function to every object in the array

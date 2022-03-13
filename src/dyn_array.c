@@ -6,8 +6,6 @@
 // these are just ideas
 // typedef enum {NONE = 0x00, SHRUNK = 0x01, SORTED = 0x02, ALL = 0xFF} DYN_FLAGS;
 
-
-
 // Supports 64bit+ size_t!
 // Semi-arbitrary cap on contents. We'll run out of memory before this happens anyway.
 // Allowing it to be externally set
@@ -21,8 +19,6 @@
 // Gets the size (in bytes) of n dyn_array elements
 #define DYN_SIZE_N_ELEMS(dyn_array_ptr, n) ((dyn_array_ptr)->data_size * (n))
 
-
-
 // Modes of operation for dyn_shift
 typedef enum { MODE_INSERT = 0x01, MODE_EXTRACT = 0x02, MODE_ERASE = 0x06, TYPE_REMOVE = 0x02 } DYN_SHIFT_MODE;
 
@@ -35,10 +31,7 @@ bool dyn_shift_insert(dyn_array_t *const dyn_array, const size_t position, const
 bool dyn_shift_remove(dyn_array_t *const dyn_array, const size_t position, const size_t count,
                       const DYN_SHIFT_MODE mode, void *const data_dst);
 
-
-
-
-dyn_array_t *dyn_array_create(const size_t capacity, const size_t data_type_size, void (*destruct_func)(void *)) 
+dyn_array_t *dyn_array_create(const size_t capacity, const size_t data_type_size, const size_t nprocesses, void (*destruct_func)(void *)) 
 {
     if (data_type_size && capacity <= DYN_MAX_CAPACITY) 
     {
@@ -63,7 +56,7 @@ dyn_array_t *dyn_array_create(const size_t capacity, const size_t data_type_size
             // I had an idea... and it compiles
             // const members of a malloc'd struct are so annoying
             memcpy(dyn_array, &((dyn_array_t){actual_capacity, 0, data_type_size,
-                                              malloc(data_type_size * actual_capacity), destruct_func}),
+                                              malloc(data_type_size * actual_capacity), nprocesses, destruct_func}),
                    sizeof(dyn_array_t));
 
             if (dyn_array->array) 
@@ -80,14 +73,14 @@ dyn_array_t *dyn_array_create(const size_t capacity, const size_t data_type_size
 
 // Creates a dynamic array from a standard array
 dyn_array_t *dyn_array_import(const void *const data, const size_t count, const size_t data_type_size,
-                              void (*destruct_func)(void *)) 
+                              const size_t nprocesses, void (*destruct_func)(void *)) 
 {
     // literally could not give us an overlapping pointer unless they guessed it
     // I'd just do a memcpy here instead of dyn_shift, but the dyn_shift branch for this is
     // short. DYN_SHIFT CANNOT fail if create worked properly, but we'll cleanup if it did anyway
     if (data && count) 
     {
-        dyn_array_t *dyn_array = dyn_array_create(count, data_type_size, destruct_func);
+        dyn_array_t *dyn_array = dyn_array_create(count, data_type_size, nprocesses, destruct_func);
         if (dyn_array) 
         {
             if (dyn_shift_insert(dyn_array, 0, count, MODE_INSERT, data)) 
@@ -117,9 +110,6 @@ void dyn_array_destroy(dyn_array_t *dyn_array)
     }
 }
 
-
-
-
 void *dyn_array_front(const dyn_array_t *const dyn_array) 
 {
     if (dyn_array && dyn_array->size) 
@@ -147,9 +137,6 @@ bool dyn_array_extract_front(dyn_array_t *const dyn_array, void *const object)
     return dyn_shift_remove(dyn_array, 0, 1, MODE_EXTRACT, object);
 }
 
-
-
-
 void *dyn_array_back(const dyn_array_t *const dyn_array) 
 {
     if (dyn_array && dyn_array->size) 
@@ -175,7 +162,6 @@ bool dyn_array_extract_back(dyn_array_t *const dyn_array, void *const object)
     // Assert size because rollunder is scary, (though it should be handled correctly)
     return dyn_array && dyn_array->size && dyn_shift_remove(dyn_array, dyn_array->size - 1, 1, MODE_EXTRACT, object);
 }
-
 
 void *dyn_array_at(const dyn_array_t *const dyn_array, const size_t index) 
 {
@@ -203,7 +189,6 @@ bool dyn_array_extract(dyn_array_t *const dyn_array, const size_t index, void *c
     return dyn_array && object && dyn_array->size > index
            && dyn_shift_remove(dyn_array, index, 1, MODE_EXTRACT, object);
 }
-
 
 void dyn_array_clear(dyn_array_t *const dyn_array) 
 {
@@ -245,8 +230,6 @@ size_t dyn_array_data_size(const dyn_array_t *const dyn_array)
     return 0;  // hmmmmm...
 }
 
-
-
 bool dyn_array_sort(dyn_array_t *const dyn_array, int (*const compare)(const void *, const void *)) 
 {
     // hah, turns out there's a quicksort in cstdlib.
@@ -258,7 +241,6 @@ bool dyn_array_sort(dyn_array_t *const dyn_array, int (*const compare)(const voi
     }
     return false;
 }
-
 
 bool dyn_array_insert_sorted(dyn_array_t *const dyn_array, const void *const object,
                              int (*const compare)(const void *, const void *)) 
@@ -278,7 +260,6 @@ bool dyn_array_insert_sorted(dyn_array_t *const dyn_array, const void *const obj
     }
     return false;
 }
-
 
 bool dyn_array_for_each(dyn_array_t *const dyn_array, void (*const func)(void *const, void *), void *arg) 
 {
@@ -302,7 +283,6 @@ bool dyn_array_for_each(dyn_array_t *const dyn_array, void (*const func)(void *c
     return false;
 }
 
-
 /*
     // No return value. It either goes or it doesn't. shrink_to_fit is more of a request
     void dyn_array_shrink_to_fit(dyn_array_t *const dyn_array) {
@@ -316,15 +296,11 @@ bool dyn_array_for_each(dyn_array_t *const dyn_array, void (*const func)(void *c
     }
 */
 
-
-
-
 //
 ///
 // HERE BE DRAGONS
 ///
 //
-
 
 // Checks to see if the object can handle an increase in size (and optionally increases capacity)
 bool dyn_request_size_increase(dyn_array_t *const dyn_array, const size_t increment);
