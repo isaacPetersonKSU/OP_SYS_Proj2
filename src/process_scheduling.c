@@ -21,7 +21,7 @@ void virtual_cpu(ProcessControlBlock_t *process_control_block)
 bool first_come_first_serve(dyn_array_t *ready_queue, ScheduleResult_t *result) 
 {
     if(ready_queue == NULL || result == NULL) return false;
-    
+    /*
     uint32 firstArrival = UINT32_MAX;
     uint32_t n = dyn_array_size(ready_queue);
     for(int i = 0; i < n; i++)
@@ -41,7 +41,7 @@ bool first_come_first_serve(dyn_array_t *ready_queue, ScheduleResult_t *result)
     }
     } 
     while(n > 0)
-    
+    */
     return true;
 }
 
