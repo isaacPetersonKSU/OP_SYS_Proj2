@@ -5,6 +5,7 @@
 
 #include "dyn_array.h"
 #include "processing_scheduling.h"
+#include "helper.c"
 
 
 // You might find this handy.  I put it around unused parameters, but you should
@@ -20,7 +21,22 @@ void virtual_cpu(ProcessControlBlock_t *process_control_block)
 
 bool first_come_first_serve(dyn_array_t *ready_queue, ScheduleResult_t *result) 
 {
+    printf("\nStarting FCFS\n");
+
     if(ready_queue == NULL || result == NULL) return false;
+    printf("\t-No null perams\n");
+    
+    uint32_t n = dyn_array_size(ready_queue);
+    if(n == 0) return false;
+    printf("\t-%d proccesses in schedule\n", n);
+
+    if(pcb_dynamic_sorter(ready_queue, (char)0) == 0) return false;
+    printf("\t-processes sorted\n");
+
+    do{
+        printf("\t-%lu processes left\n", dyn_array_size(ready_queue));
+    }
+    while(dyn_array_pop_front(ready_queue)); //returns false when out of items
     /*
     uint32 firstArrival = UINT32_MAX;
     uint32_t n = dyn_array_size(ready_queue);
@@ -80,8 +96,8 @@ dyn_array_t *load_process_control_blocks(const char *input_file)
 
     //printf("\n\t\tArival\tBurst T\tPriority\n");
     for(uint32_t i = 0; i < nprocesses; i++) {
-        if(fread(&myPCB[i], sizeof(uint32_t), 3, fp) != 3)
-        {
+        if(fread(&myPCB[i], sizeof(uint32_t), 3, fp) != 3) //fread returns number of elements copied on sucess.
+        { 
             free(myPCB);
             return NULL;
         }

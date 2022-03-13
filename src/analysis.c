@@ -36,17 +36,17 @@ int main(int argc, char **argv)
         printf("%s <pcb file> <schedule algorithme> [quantum]\n", argv[0]);
         return EXIT_FAILURE;
     }
-    printf("-input validated\n");
+    //printf("-input validated\n");
 
     int quantum = atoi(argv[3]);
-    printf("-valid quantum input: %d\n", quantum);
+    //printf("-valid quantum input: %d\n", quantum);
 
     dyn_array_t * ready_queue = load_process_control_blocks(argv[1]);
     if (!ready_queue) return -1;
-    printf("-file loaded\n");
+    //printf("-file loaded\n");
 
     ScheduleResult_t result = {0, 0, 0};
-    printf("-results struct created\n");
+    //printf("-results struct created\n");
 
 
     if (strcmp(argv[2], FCFS) == 0) 

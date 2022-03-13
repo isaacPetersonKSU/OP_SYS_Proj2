@@ -13,7 +13,7 @@ void swappcb(ProcessControlBlock_t * pcb1, ProcessControlBlock_t * pcb2)
     *pcb2 = temppcb;
 }
     
-
+/*
 void sortpcb_arrival(ProcessControlBlock_t * pcb, size_t n)
 {
     for(size_t j = n-1; j > 0; j--) {
@@ -23,6 +23,39 @@ void sortpcb_arrival(ProcessControlBlock_t * pcb, size_t n)
             }
         }
     }
+}*/
+
+///
+/// Returns a pointer to the desired object in the array
+/// Pointer may be invalidated if the container increases in size
+/// \param dyn_array the dynamic array of PCBs to sort
+/// \param attribute what to sort by 
+///         0 for remaining_burst_time
+///         1 for priority
+///         2 for arrival
+///         anything else will abort and return false
+/// \return true if sucessfull, false for invalid perams
+///
+bool pcb_dynamic_sorter(dyn_array_t * dyn_array, char attribute)
+{
+    if(dyn_array == NULL || attribute > (char)2) return false;
+    printf("\t\t-valid perams\n");
+
+    uint32_t n = dyn_array_size(dyn_array);
+    printf("\t\t-%u processes\n", n);
+
+    char debuggingText[3][20] = {"remaining_burst_time", "priority", "arrival"};
+    printf("\t\t-sorting by %s\n", debuggingText[(int)attribute]);
+    
+    for(size_t j = n-1; j > 0; j--) {
+        for(size_t i = 0; i < j ; i++) {
+            if(dyn_array_at(dyn_arr, i)->arrival)
+                swappcb(&pcb[i], &pcb[i+1]);
+            }
+        }
+    }
+    printf("\t\t-sort successful\n");
+    return true;
 }
 
 

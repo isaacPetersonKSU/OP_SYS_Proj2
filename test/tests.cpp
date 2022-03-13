@@ -4,8 +4,6 @@
 #include <pthread.h>
 #include "../include/processing_scheduling.h"
 
-
-
 // Using a C library requires extern "C" to prevent function managling
 extern "C" 
 {
@@ -19,6 +17,7 @@ unsigned int score;
 unsigned int total;
 
 dyn_array_t * EmptyValidArrayPtr;
+dyn_array_t * PopulatedArrayPtr;
 ScheduleResult_t result;
 
 class GradeEnvironment : public testing::Environment 
@@ -27,6 +26,8 @@ class GradeEnvironment : public testing::Environment
         virtual void SetUp() 
         {
             EmptyValidArrayPtr = dyn_array_create(0, 1, NULL);
+
+            PopulatedArrayPtr = load_process_control_blocks("../pcb.bin");
 
             score = 0;
             total = 210;
@@ -93,10 +94,15 @@ TEST (FCFS, nullResultPtr)
 {
     EXPECT_FALSE(first_come_first_serve(EmptyValidArrayPtr, nullptr));
 }
-TEST (FCFS, validPerams)
+TEST (FCFS, emptyInputArray)
 {
-    EXPECT_TRUE(first_come_first_serve(EmptyValidArrayPtr, &result));
+    EXPECT_FALSE(first_come_first_serve(EmptyValidArrayPtr, &result));
 }
+TEST(FCFS, outputValidation)
+{
+    EXPECT_TRUE(first_come_first_serve(PopulatedArrayPtr, &result));
+}
+
 
 
 /*
@@ -118,22 +124,6 @@ TEST(SJF, validPerams)
 {
     EXPECT_TRUE(shortest_job_first(EmptyValidArrayPtr, &result));
 }
-
-/*
-DO NOT IMPLEMNET NOT PART OF ASSIGNMENT
-TEST (Priority, nullArrayPtr)
-{
-    EXPECT_FALSE(priority(nullptr, &result));
-}
-TEST (Priority, nullResultsPtr)
-{
-    EXPECT_FALSE(priority(arrayPtr, nullptr));
-}
-TEST(Priority, validPerams)
-{
-    EXPECT_TRUE(priority(arrayPtr, &result));
-}
-*/
 
 /*
     // Runs the Round Robin Process Scheduling algorithm over the incoming ready_queue
@@ -180,6 +170,7 @@ TEST (SRTF, validPerams)
 {
     EXPECT_TRUE(shortest_remaining_time_first(EmptyValidArrayPtr, &result));
 }
+
 
 int main(int argc, char **argv) 
 {
