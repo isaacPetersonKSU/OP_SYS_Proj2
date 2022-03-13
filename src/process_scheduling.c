@@ -21,43 +21,37 @@ void virtual_cpu(ProcessControlBlock_t *process_control_block)
 
 bool first_come_first_serve(dyn_array_t *ready_queue, ScheduleResult_t *result) 
 {
-    printf("\nStarting FCFS\n");
-
     if(ready_queue == NULL || result == NULL) return false;
-    printf("\t-No null perams\n");
-    
     uint32_t n = dyn_array_size(ready_queue);
     if(n == 0) return false;
-    printf("\t-%d proccesses in schedule\n", n);
-
-    if(pcb_dynamic_sorter(ready_queue, (char)0) == 0) return false;
-    printf("\t-processes sorted\n");
-
-    do{
-        printf("\t-%lu processes left\n", dyn_array_size(ready_queue));
-    }
-    while(dyn_array_pop_front(ready_queue)); //returns false when out of items
-    /*
-    uint32 firstArrival = UINT32_MAX;
-    uint32_t n = dyn_array_size(ready_queue);
-    for(int i = 0; i < n; i++)
+    if(dyn_array_sort(ready_queue, compArrival) == false) return false;
+    
+    int ticks = 0;
+    int i = 0;
+    int * wait_times = calloc(n, sizeof(int));
+    int * turnaround_times = calloc(n, sizeof(int));
+    
+    ProcessControlBlock_t * block = malloc(sizeof(ProcessControlBlock_t));
+    while(dyn_array_extract_front(ready_queue, block))
     {
-
-        for(int j = i + 1; j++)
+        wait_times[i] = ticks;
+        while(block->remaining_burst_time > 0)
         {
-            
+            virtual_cpu(block);
+            ticks++;
         }
-
-        process_control_block_t * block = dyn_array_at(ready_queue, n);
-        if(block->remaining_burst_time > 0 && block->arival < nextUp.arrival)
-        {
-            nextUp = block;
-            firstArrival = nextUp->arrival;
-        }
+        turnaround_times[i] = ticks - wait_times[i];
+        i++;
     }
-    } 
-    while(n > 0)
-    */
+    
+    while(--i > 0)
+    {
+        result->average_waiting_time += wait_times[i];
+        result->average_turnaround_time += turnaround_times[i];
+    }
+    result->average_waiting_time /= n;
+    result->average_turnaround_time /= n;
+    result->total_run_time = ticks;
     return true;
 }
 
@@ -94,7 +88,6 @@ dyn_array_t *load_process_control_blocks(const char *input_file)
 
     ProcessControlBlock_t *myPCB = (ProcessControlBlock_t *) malloc(nprocesses * sizeof(ProcessControlBlock_t));
 
-    //printf("\n\t\tArival\tBurst T\tPriority\n");
     for(uint32_t i = 0; i < nprocesses; i++) {
         if(fread(&myPCB[i], sizeof(uint32_t), 3, fp) != 3) //fread returns number of elements copied on sucess.
         { 
@@ -102,8 +95,6 @@ dyn_array_t *load_process_control_blocks(const char *input_file)
             return NULL;
         }
         myPCB[i].started = false;
-        //ProcessControlBlock_t iPCB = myPCB[i];
-        //printf("myPCB[%d]\t%d\t%d\t%d\n", i, iPCB.remaining_burst_time, iPCB.priority, iPCB.arrival);
     }
 
     fclose(fp);

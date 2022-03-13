@@ -3,6 +3,7 @@
 #include "gtest/gtest.h"
 #include <pthread.h>
 #include "../include/processing_scheduling.h"
+#include "../src/helper.c"
 
 // Using a C library requires extern "C" to prevent function managling
 extern "C" 
@@ -18,6 +19,10 @@ unsigned int total;
 
 dyn_array_t * EmptyValidArrayPtr;
 dyn_array_t * PopulatedArrayPtr;
+
+ProcessControlBlock_t low;
+ProcessControlBlock_t high;
+
 ScheduleResult_t result;
 
 class GradeEnvironment : public testing::Environment 
@@ -26,8 +31,14 @@ class GradeEnvironment : public testing::Environment
         virtual void SetUp() 
         {
             EmptyValidArrayPtr = dyn_array_create(0, 1, NULL);
-
             PopulatedArrayPtr = load_process_control_blocks("../pcb.bin");
+
+            low.remaining_burst_time = 0;
+            high.remaining_burst_time = 1;
+            low.priority = 0;
+            high.priority = 1;
+            low.arrival = 0;
+            high.arrival = 1;
 
             score = 0;
             total = 210;
@@ -69,11 +80,11 @@ TEST (loadPCB, validPerams)
 TEST (loadPCB, validateOutpu)
 {
     dyn_array_t * queue = load_process_control_blocks("../pcb.bin");
-    printf("\t\tArival\tBurst T\tPriority\n");
+    printf("\t\tBurst T\tPriority\tArival\n");
     for(uint32_t i = 0; i < queue->size; i++)
     {
         ProcessControlBlock_t block = *(ProcessControlBlock_t*)dyn_array_at(queue, i);
-        printf("myPCB[%d]\t%d\t%d\t%d\n", i, block.remaining_burst_time, block.priority, block.arrival);
+        printf("myPCB[%d]\t%d\t%d\t\t%d\n", i, block.remaining_burst_time, block.priority, block.arrival);
 
         EXPECT_FALSE(block.started);
     }
@@ -171,6 +182,30 @@ TEST (SRTF, validPerams)
     EXPECT_TRUE(shortest_remaining_time_first(EmptyValidArrayPtr, &result));
 }
 
+/*
+    tests for funtions that compare PCB structs
+*/
+TEST(comparisonFunctions, RemainingTime)
+{
+    EXPECT_EQ(-1, compTRemaining(&low, &high));
+    EXPECT_EQ(1, compTRemaining(&high, &low));
+    EXPECT_EQ(0, compTRemaining(&low, &low));
+    EXPECT_EQ(0, compTRemaining(&high, &high));
+}
+TEST(comparisonFunctions, Priority)
+{
+    EXPECT_EQ(-1, compPriority(&low, &high));
+    EXPECT_EQ(1, compPriority(&high, &low));
+    EXPECT_EQ(0, compPriority(&low, &low));
+    EXPECT_EQ(0, compPriority(&high, &high));
+}
+TEST(comparisonFunctions, Arrival)
+{
+    EXPECT_EQ(-1, compArrival(&low, &high));
+    EXPECT_EQ(1, compArrival(&high, &low));
+    EXPECT_EQ(0, compArrival(&low, &low));
+    EXPECT_EQ(0, compArrival(&high, &high));
+}
 
 int main(int argc, char **argv) 
 {

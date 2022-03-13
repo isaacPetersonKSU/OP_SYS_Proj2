@@ -11,3 +11,5 @@ You can manually copy the time analysis from console and paste it to this readme
 ---------------------------------------------------------------------------
 Add your scheduling algorithm analysis below this line in a readable format. 
 ---------------------------------------------------------------------------
+efe2022-03-13 16:08:49	First Come First Serve Analysis:
+	Waiting Time - 17.500000, Turnaround Time - 8.750000, Total Time - 50

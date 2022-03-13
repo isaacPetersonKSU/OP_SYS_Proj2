@@ -13,7 +13,7 @@ void swappcb(ProcessControlBlock_t * pcb1, ProcessControlBlock_t * pcb2)
     *pcb2 = temppcb;
 }
     
-/*
+
 void sortpcb_arrival(ProcessControlBlock_t * pcb, size_t n)
 {
     for(size_t j = n-1; j > 0; j--) {
@@ -23,16 +23,17 @@ void sortpcb_arrival(ProcessControlBlock_t * pcb, size_t n)
             }
         }
     }
-}*/
+}
 
+/* I started making this and found out a better version exists in dyn_array.c already. :( 
 ///
 /// Returns a pointer to the desired object in the array
 /// Pointer may be invalidated if the container increases in size
 /// \param dyn_array the dynamic array of PCBs to sort
 /// \param attribute what to sort by 
-///         0 for remaining_burst_time
-///         1 for priority
-///         2 for arrival
+///         0 for arrival
+///         1 for remaining_burst_time
+///         2 for priority
 ///         anything else will abort and return false
 /// \return true if sucessfull, false for invalid perams
 ///
@@ -44,19 +45,24 @@ bool pcb_dynamic_sorter(dyn_array_t * dyn_array, char attribute)
     uint32_t n = dyn_array_size(dyn_array);
     printf("\t\t-%u processes\n", n);
 
-    char debuggingText[3][20] = {"remaining_burst_time", "priority", "arrival"};
+    char debuggingText[3][20] = {"arrival", "remaining_burst_time", "priority"};
     printf("\t\t-sorting by %s\n", debuggingText[(int)attribute]);
     
     for(size_t j = n-1; j > 0; j--) {
         for(size_t i = 0; i < j ; i++) {
-            if(dyn_array_at(dyn_arr, i)->arrival)
-                swappcb(&pcb[i], &pcb[i+1]);
+            uint32_t leftAttribute = *(uint32_t*)(dyn_array_at(dyn_array, i) + (sizeof(uint32_t) * attribute));
+            uint32_t rightAttribute = *(uint32_t*)(dyn_array_at(dyn_array, i) + (sizeof(uint32_t) * attribute));
+            printf("\t\t\t-compairing %u and %u\n", leftAttribute, rightAttribute);
+
+            if(leftAttribute > rightAttribute)
+                //swappcb(&pcb[i], &pcb[i+1]);
+
             }
         }
     }
     printf("\t\t-sort successful\n");
     return true;
-}
+}*/
 
 
 void sortpcb_burst(ProcessControlBlock_t * pcb, size_t n)
@@ -135,6 +141,27 @@ int ready_queue_destroy(dyn_array_t * ready_queue, uint32_t i)
         pcb++;
     }
     
+    return 0;
+}
+
+int compTRemaining(const void * p1, const void * p2)
+{
+    if(((ProcessControlBlock_t*)p1)->remaining_burst_time < ((ProcessControlBlock_t*)p2)->remaining_burst_time) return -1;
+    if(((ProcessControlBlock_t*)p1)->remaining_burst_time > ((ProcessControlBlock_t*)p2)->remaining_burst_time) return 1;
+    return 0;
+}
+
+int compPriority(const void * p1, const void * p2)
+{
+    if(((ProcessControlBlock_t*)p1)->priority < ((ProcessControlBlock_t*)p2)->priority) return -1;
+    if(((ProcessControlBlock_t*)p1)->priority > ((ProcessControlBlock_t*)p2)->priority) return 1;
+    return 0;
+}
+
+int compArrival(const void * p1, const void * p2)
+{
+    if(((ProcessControlBlock_t*)p1)->arrival < ((ProcessControlBlock_t*)p2)->arrival) return -1;
+    if(((ProcessControlBlock_t*)p1)->arrival > ((ProcessControlBlock_t*)p2)->arrival) return 1;
     return 0;
 }
 
