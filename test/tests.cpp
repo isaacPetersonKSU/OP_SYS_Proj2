@@ -46,7 +46,7 @@ TEST (process_scheduling, loadPCB){
     // test individual values
 }
 
-TEST (proces_scheduling, FCFS_result){
+TEST (process_scheduling, FCFS_result){
     ScheduleResult_t result;
     ready_queue = load_process_control_blocks("../pcb.bin");
     EXPECT_EQ(true, first_come_first_serve(ready_queue, &result));
@@ -55,13 +55,32 @@ TEST (proces_scheduling, FCFS_result){
     EXPECT_EQ(28.5, result.average_turnaround_time);
 }
 
-TEST (proces_scheduling, SJF_result){
+TEST (process_scheduling, SJF_result){
     ScheduleResult_t result;
     ready_queue = load_process_control_blocks("../pcb.bin");
     EXPECT_EQ(true, shortest_job_first(ready_queue, &result));
     EXPECT_EQ(50, result.total_run_time);
     EXPECT_EQ(14.75, result.average_waiting_time);
     EXPECT_EQ(27.25, result.average_turnaround_time);
+}
+
+TEST (process_scheduling, RR_result){
+    ScheduleResult_t result;
+    ready_queue = load_process_control_blocks("../pcb.bin");
+    EXPECT_EQ(true, round_robin(ready_queue, &result, 5));
+    EXPECT_EQ(50, result.total_run_time);
+    EXPECT_EQ(19.75, result.average_waiting_time);
+    EXPECT_EQ(32.25, result.average_turnaround_time);
+}
+
+
+TEST (process_scheduling, SRTF_result){
+    ScheduleResult_t result;
+    ready_queue = load_process_control_blocks("../pcb.bin");
+    EXPECT_EQ(true, shortest_remaining_time_first(ready_queue, &result));
+    EXPECT_EQ(50, result.total_run_time);
+    EXPECT_EQ(11.75, result.average_waiting_time);
+    EXPECT_EQ(24.25, result.average_turnaround_time);
 }
 
 int main(int argc, char **argv) 

@@ -113,6 +113,7 @@ bool shortest_job_first(dyn_array_t *ready_queue, ScheduleResult_t *result)
             if (!dyn_array_extract_front(ready_queue, &curr_process)) return false;
             dyn_array_sort(ready_queue, sort_burst_time);
         }
+
         wait = tick - curr_process.arrival;
         total_wait += wait;
         burst_time = curr_process.remaining_burst_time;
@@ -151,14 +152,38 @@ bool priority(dyn_array_t *ready_queue, ScheduleResult_t *result)
 bool round_robin(dyn_array_t *ready_queue, ScheduleResult_t *result, size_t quantum) 
 {
     //add any more error checking
-    if (ready_queue == NULL || result == NULL) return false;
+    if (ready_queue == NULL || result == NULL || quantum == 0) return false;
 
     dyn_array_sort(ready_queue, sort_arrival);
     
     uint32_t nprocs = dyn_array_size(ready_queue);
     //ProcessControlBlock_t *pcb = ready_queue->array;
-    quantum++;
-    nprocs++;
+    uint32_t i, burst_time, total_turn_around = 0, total_wait = 0, wait = 0, tick = 0;
+    ProcessControlBlock_t curr_process;
+    while(!dyn_array_empty(ready_queue)){
+        if (!dyn_array_extract_front(ready_queue, &curr_process)) return false;
+        
+        wait = tick - curr_process.arrival;
+        total_wait += wait;
+        burst_time = curr_process.remaining_burst_time;
+        total_turn_around += wait + burst_time;
+
+        for (i = 0; i < burst_time && i < quantum; i++){
+            virtual_cpu(&curr_process);
+            tick++;
+        }
+
+        printf("start burst: %d\nend burst: %d\n", burst_time, curr_process.remaining_burst_time);
+
+        if (curr_process.remaining_burst_time > 0){
+            curr_process.arrival = tick;
+            dyn_array_push_back(ready_queue, &curr_process);
+        }
+    }
+
+    result->total_run_time = tick;
+    result->average_waiting_time = (float) total_wait / (float) nprocs;
+    result->average_turnaround_time = (float) total_turn_around / (float) nprocs;
 
     return true;
 }
@@ -188,7 +213,50 @@ dyn_array_t *load_process_control_blocks(const char *input_file)
 
 bool shortest_remaining_time_first(dyn_array_t *ready_queue, ScheduleResult_t *result) 
 {
-    UNUSED(ready_queue);
-    UNUSED(result);
-    return false;
+    if (ready_queue == NULL || result == NULL) return false;
+
+    uint32_t nprocs = dyn_array_size(ready_queue);
+
+    dyn_array_sort(ready_queue, sort_burst_time);
+
+    ProcessControlBlock_t curr_process;
+    const ProcessControlBlock_t* next_process;
+    uint32_t tick = 0, total_wait = 0, total_turn_around = 0, wait = 0;
+    uint32_t i, burst_time;
+    while(!dyn_array_empty(ready_queue)){
+        if (!dyn_array_extract_front(ready_queue, &curr_process)) return false;
+
+        // sorts by arrival and takes next in arrival
+        if (tick > curr_process.arrival){
+            dyn_array_push_front(ready_queue, &curr_process);
+            dyn_array_sort(ready_queue, sort_arrival);
+            if (!dyn_array_extract_front(ready_queue, &curr_process)) return false;
+            dyn_array_sort(ready_queue, sort_burst_time);
+        }
+
+        wait = tick - curr_process.arrival;
+        total_wait += wait;
+        burst_time = curr_process.remaining_burst_time;
+        total_turn_around += wait + burst_time;
+
+        next_process = dyn_array_front(ready_queue);
+        for(i = 0; i < burst_time; i++){
+            virtual_cpu(&curr_process);
+            tick++;
+            if (!next_process) continue;
+            
+            if (next_process->remaining_burst_time < burst_time && next_process->remaining_burst_time < burst_time){
+                curr_process.arrival = tick;
+                dyn_array_push_front(ready_queue, &curr_process);
+                dyn_array_sort(ready_queue, sort_burst_time);
+                break;
+            }
+        }
+    }
+
+    result->total_run_time = tick;
+    result->average_waiting_time = (float) total_wait / (float) nprocs;
+    result->average_turnaround_time = (float) total_turn_around / (float) nprocs;
+
+    return true;   
 }
