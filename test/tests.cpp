@@ -48,7 +48,8 @@ TEST (process_scheduling, loadPCB){
 
 TEST (proces_scheduling, FCFS_result){
     ScheduleResult_t result;
-    first_come_first_serve(ready_queue, &result);
+    ready_queue = load_process_control_blocks("../pcb.bin");
+    EXPECT_EQ(true, first_come_first_serve(ready_queue, &result));
     EXPECT_EQ(50, result.total_run_time);
     EXPECT_EQ(16, result.average_waiting_time);
     EXPECT_EQ(28.5, result.average_turnaround_time);
@@ -56,7 +57,8 @@ TEST (proces_scheduling, FCFS_result){
 
 TEST (proces_scheduling, SJF_result){
     ScheduleResult_t result;
-    first_come_first_serve(ready_queue, &result);
+    ready_queue = load_process_control_blocks("../pcb.bin");
+    EXPECT_EQ(true, shortest_job_first(ready_queue, &result));
     EXPECT_EQ(50, result.total_run_time);
     EXPECT_EQ(14.75, result.average_waiting_time);
     EXPECT_EQ(27.25, result.average_turnaround_time);

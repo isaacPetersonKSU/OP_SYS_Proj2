@@ -25,18 +25,19 @@ int sort_arrival(const void* process1, const void* process2){
 
 // computes stats for nonpreemptive algorithms for schedule result
 bool nonpreemptive_stats(const ProcessControlBlock_t* pcb, ScheduleResult_t* result, size_t nprocs){
-    uint32_t wait_time[nprocs], turn_around[nprocs], burst_time[nprocs];
+    uint32_t wait_time[nprocs], turn_around[nprocs], burst_time[nprocs], arrivals[nprocs];
     unsigned long total_wait = 0, total_tat = 0, run_time = 0;
     uint32_t i;
 
     for (i = 0; i < nprocs; i++){
         burst_time[i] = pcb[i].remaining_burst_time;
+        arrivals[i] = pcb[i].arrival;
         run_time += burst_time[i];
     }
 
     wait_time[0] = 0;
     for (i = 1; i < nprocs; i++){
-        wait_time[i] = wait_time[i-1] + burst_time[i-1] - 1;
+        wait_time[i] = wait_time[i-1] + burst_time[i-1] - arrivals[i] + arrivals[i-1];
         total_wait += wait_time[i];
     }
 
@@ -62,8 +63,26 @@ bool first_come_first_serve(dyn_array_t *ready_queue, ScheduleResult_t *result)
     dyn_array_sort(ready_queue, sort_arrival);
     
     uint32_t nprocs = dyn_array_size(ready_queue);
-    ProcessControlBlock_t *pcb = ready_queue->array;
-    nonpreemptive_stats(pcb, result, nprocs); 
+   // ProcessControlBlock_t *pcb = ready_queue->array;
+
+    ProcessControlBlock_t curr_process;
+    uint32_t tick = 0, total_wait = 0, total_turn_around = 0, wait = 0;
+    uint32_t j, burst_time;
+    while(!dyn_array_empty(ready_queue)){
+        if (!dyn_array_extract_front(ready_queue, &curr_process)) return false;
+        wait = tick - curr_process.arrival;
+        total_wait += wait;
+        burst_time = curr_process.remaining_burst_time;
+        total_turn_around += wait + burst_time;
+        for(j = 0; j < burst_time; j++){
+            virtual_cpu(&curr_process);
+            tick++;
+        }
+    }
+
+    result->total_run_time = tick;
+    result->average_waiting_time = (float) total_wait / (float) nprocs;
+    result->average_turnaround_time = (float) total_turn_around / (float) nprocs;
 
     return true;
 }
@@ -77,17 +96,36 @@ bool shortest_job_first(dyn_array_t *ready_queue, ScheduleResult_t *result)
 {
     if (ready_queue == NULL || result == NULL) return false;
 
-    dyn_array_sort(ready_queue, sort_arrival);
-
-    // object that arrived first
-    ProcessControlBlock_t first;
-    dyn_array_extract_front(ready_queue, &first);
-    dyn_array_sort(ready_queue, sort_burst_time);
-    dyn_array_push_front(ready_queue, &first);
-    
     uint32_t nprocs = dyn_array_size(ready_queue);
-    ProcessControlBlock_t *pcb = ready_queue->array;
-    nonpreemptive_stats(pcb, result, nprocs);
+
+    dyn_array_sort(ready_queue, sort_burst_time);
+
+    ProcessControlBlock_t curr_process;
+    uint32_t tick = 0, total_wait = 0, total_turn_around = 0, wait = 0;
+    uint32_t j, burst_time;
+    while(!dyn_array_empty(ready_queue)){
+        if (!dyn_array_extract_front(ready_queue, &curr_process)) return false;
+
+        // sorts by arrival and takes next in arrival
+        if (tick > curr_process.arrival){
+            dyn_array_push_front(ready_queue, &curr_process);
+            dyn_array_sort(ready_queue, sort_arrival);
+            if (!dyn_array_extract_front(ready_queue, &curr_process)) return false;
+            dyn_array_sort(ready_queue, sort_burst_time);
+        }
+        wait = tick - curr_process.arrival;
+        total_wait += wait;
+        burst_time = curr_process.remaining_burst_time;
+        total_turn_around += wait + burst_time;
+        for(j = 0; j < burst_time; j++){
+            virtual_cpu(&curr_process);
+            tick++;
+        }
+    }
+
+    result->total_run_time = tick;
+    result->average_waiting_time = (float) total_wait / (float) nprocs;
+    result->average_turnaround_time = (float) total_turn_around / (float) nprocs;
 
     return true;   
 }
@@ -109,12 +147,20 @@ bool priority(dyn_array_t *ready_queue, ScheduleResult_t *result)
     return false;   
 }
 
+
 bool round_robin(dyn_array_t *ready_queue, ScheduleResult_t *result, size_t quantum) 
 {
-    UNUSED(ready_queue);
-    UNUSED(result);
-    UNUSED(quantum);
-    return false;
+    //add any more error checking
+    if (ready_queue == NULL || result == NULL) return false;
+
+    dyn_array_sort(ready_queue, sort_arrival);
+    
+    uint32_t nprocs = dyn_array_size(ready_queue);
+    //ProcessControlBlock_t *pcb = ready_queue->array;
+    quantum++;
+    nprocs++;
+
+    return true;
 }
 
 

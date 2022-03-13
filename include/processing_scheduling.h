@@ -65,11 +65,6 @@ extern "C"
     // \return true if function ran successful else false for an error
     bool shortest_remaining_time_first(dyn_array_t *ready_queue, ScheduleResult_t *result);
 
-    // compare functions for qsort
-    //int sort_arrival(const void* process1, const void* process2);
-    //int sort_burst_time(const void* process1, const void* process2);
-    //int sort_priority(const void* process1, const void* process2);
-
 #ifdef __cplusplus
 }
 #endif
