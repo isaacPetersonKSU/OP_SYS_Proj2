@@ -20,12 +20,41 @@ void virtual_cpu(ProcessControlBlock_t *process_control_block)
 
 
 
-int sort_arrival(const void* process1, const void* thing2){
-    return (const ProcessControlBlock_t*)process1->arrival - (const ProcessControlBlock_t*)process1->arrival;
+int sort_arrival(const void* process1, const void* process2){
+    return ((const ProcessControlBlock_t*)process1)->arrival - ((const ProcessControlBlock_t*)process2)->arrival;
 }
 
 bool first_come_first_serve(dyn_array_t *ready_queue, ScheduleResult_t *result) 
 {
+    /*
+    // Error check
+    // Sort by arrival time
+    ProcessControlBlock_t nextprocess;
+
+    size_t nprocesses = ready_queue->nprocesses;
+
+    int ticks = 0;
+
+    while (ready_queue->nprocesses > 0) {
+        ready_queue_pop(ready_queue, &nextprocess);
+
+        for (int i = quantum; q != 0; i--, ticks++) {
+
+            if (ready_queue->arrival < ticks) {
+                virtual_cpu(&nextprocess);
+
+                if(nextprocess->remaining_burst_time <=0) { // finished through burst time for the current process
+                ticks++;
+                // Calculate turn around time and waiting time for this process
+                break;
+                }
+            }
+        }
+        if (nextprocess->remaining_burst_time > 0) ready_queue_push(ready_queue, &nextprocess);
+    }
+    
+    */
+    //add any more error checking
     if (ready_queue == NULL || result == NULL) return false;
 
     uint32_t nprocs = dyn_array_size(ready_queue);
@@ -36,9 +65,8 @@ bool first_come_first_serve(dyn_array_t *ready_queue, ScheduleResult_t *result)
     
     uint32_t i;
     ProcessControlBlock_t *array = ready_queue->array;
-    qsort(array, nprocs, sizeof(ProcessControlBlock_t), sort_arrival);
-    
-
+    dyn_array_sort(ready_queue, sort_arrival); 
+    // Calculate all averages
     for (i = 0; i < nprocs; i++){
         burst_time[i] = array[i].remaining_burst_time;
         run_time += burst_time[i];
@@ -64,13 +92,19 @@ bool first_come_first_serve(dyn_array_t *ready_queue, ScheduleResult_t *result)
     return true;
 }
 
-
+int sort_burst_time(const void* process1, const void* process2){
+    return ((const ProcessControlBlock_t*)process1)->remaining_burst_time - ((const ProcessControlBlock_t*)process1)->remaining_burst_time;
+}
 
 bool shortest_job_first(dyn_array_t *ready_queue, ScheduleResult_t *result) 
 {
     UNUSED(ready_queue);
     UNUSED(result);
     return false;   
+}
+
+int sort_burst_time(const void* process1, const void* process2){
+    return ((const ProcessControlBlock_t*)process1)->priority - ((const ProcessControlBlock_t*)process1)->priority;
 }
 
 bool priority(dyn_array_t *ready_queue, ScheduleResult_t *result) 

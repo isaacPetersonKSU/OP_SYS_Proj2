@@ -25,8 +25,14 @@ int main(int argc, char **argv)
     if (!ready_queue) return -1;
 
     if (strcmp(argv[2], FCFS) == 0){
-        first_come_first_serve(ready_queue, &result);
+        if (first_come_first_serve(ready_queue, &result)){
+            // print results
+        }
+        else{
+            return EXIT_FAILURE;
+        }
     }
+    if (strcmp(argv[2], P))
 
     // fprintf something
 
