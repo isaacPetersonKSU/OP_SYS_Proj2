@@ -46,12 +46,20 @@ TEST (process_scheduling, loadPCB){
     // test individual values
 }
 
-TEST (proces_scheduling, FCFS_validate_input){
+TEST (proces_scheduling, FCFS_result){
     ScheduleResult_t result;
     first_come_first_serve(ready_queue, &result);
     EXPECT_EQ(50, result.total_run_time);
-    EXPECT_EQ(17.5, result.average_waiting_time);
-    EXPECT_EQ(30, result.average_turnaround_time);
+    EXPECT_EQ(16, result.average_waiting_time);
+    EXPECT_EQ(28.5, result.average_turnaround_time);
+}
+
+TEST (proces_scheduling, SJF_result){
+    ScheduleResult_t result;
+    first_come_first_serve(ready_queue, &result);
+    EXPECT_EQ(50, result.total_run_time);
+    EXPECT_EQ(14.75, result.average_waiting_time);
+    EXPECT_EQ(27.25, result.average_turnaround_time);
 }
 
 int main(int argc, char **argv) 
