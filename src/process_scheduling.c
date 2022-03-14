@@ -166,14 +166,18 @@ bool round_robin(dyn_array_t *ready_queue, ScheduleResult_t *result, size_t quan
         wait = tick - curr_process.arrival;
         total_wait += wait;
         burst_time = curr_process.remaining_burst_time;
-        total_turn_around += wait + burst_time;
+        total_turn_around += wait;
+        if (burst_time > quantum){
+            total_turn_around += quantum;
+        }
+        else{
+            total_turn_around += burst_time;
+        }
 
         for (i = 0; i < burst_time && i < quantum; i++){
             virtual_cpu(&curr_process);
             tick++;
         }
-
-        printf("start burst: %d\nend burst: %d\n", burst_time, curr_process.remaining_burst_time);
 
         if (curr_process.remaining_burst_time > 0){
             curr_process.arrival = tick;
