@@ -42,13 +42,13 @@ int metaDataOutput(char* filePath, enum algorithm al, ScheduleResult_t * result)
             fprintf(metaData, FCFS_SUCCESS_MSG);
             break;    
         case SJF: 
-            fprintf(metaData, FCFS_SUCCESS_MSG);
+            fprintf(metaData, SJF_SUCCESS_MSG);
             break;
         case RR: 
-            fprintf(metaData, FCFS_SUCCESS_MSG); 
+            fprintf(metaData, RR_SUCCESS_MSG); 
             break;
         case SRTF: 
-            fprintf(metaData, FCFS_SUCCESS_MSG);
+            fprintf(metaData, SRTF_SUCCESS_MSG);
             break;
         default:
             fprintf(metaData, FAIL_MSG);
@@ -82,8 +82,6 @@ int main(int argc, char **argv)
     if (!strcmp(argv[2], "FCFS") && first_come_first_serve(ready_queue, result)) al = FCFS;
     else if (!strcmp(argv[2], "SJF") && shortest_job_first(ready_queue, result)) al = SJF;
     else if (!strcmp(argv[2], "RR") && argc == 4 && round_robin(ready_queue, result, atoi(argv[3]))) al = RR;
-
     else if (!strcmp(argv[2], "SRTF") && shortest_remaining_time_first(ready_queue, result)) al = SRTF;
-
     return metaDataOutput("../readme.md", al, result);
 }

@@ -19,6 +19,7 @@ void virtual_cpu(ProcessControlBlock_t *process_control_block)
     --process_control_block->remaining_burst_time;
 }
 
+
 bool first_come_first_serve(dyn_array_t *ready_queue, ScheduleResult_t *result) 
 {
     if(ready_queue == NULL || result == NULL) return false;
@@ -57,9 +58,45 @@ bool first_come_first_serve(dyn_array_t *ready_queue, ScheduleResult_t *result)
 
 bool shortest_job_first(dyn_array_t *ready_queue, ScheduleResult_t *result) 
 {
+    printf("performing shortest job first\n");
     if(ready_queue == NULL || result == NULL) return false;
+    printf("\tperams not null\n");
+    uint32_t n = dyn_array_size(ready_queue);
+    printf("\t%d processes\n", n);
+    if(n == 0) return false;
+    if(dyn_array_sort(ready_queue, compTRemaining) == false) return false;
+    printf("\tprocesses sorted\n");
+    
+    int ticks = 0;
+    int i = 0;
+    int * wait_times = calloc(n, sizeof(int));
+    int * turnaround_times = calloc(n, sizeof(int));
 
-    return true;   
+    ProcessControlBlock_t * block = malloc(sizeof(ProcessControlBlock_t));
+    printf("\tresult data allocated");
+    while(dyn_array_extract_front(ready_queue, block))
+    {
+        printf("starting next process\n");
+        wait_times[i] = ticks;
+        while(block->remaining_burst_time > 0)
+        {
+            virtual_cpu(block);
+            ticks++;
+            printf("\t\tVirtual CPU ticked\n");
+        }
+        turnaround_times[i] = ticks - wait_times[i];
+        i++;
+    }
+    
+    while(--i > 0)
+    {
+        result->average_waiting_time += wait_times[i];
+        result->average_turnaround_time += turnaround_times[i];
+    }
+    result->average_waiting_time /= n;
+    result->average_turnaround_time /= n;
+    result->total_run_time = ticks;
+    return true;
 }
 
 bool priority(dyn_array_t *ready_queue, ScheduleResult_t *result) 
@@ -98,7 +135,7 @@ dyn_array_t *load_process_control_blocks(const char *input_file)
     }
 
     fclose(fp);
-    dyn_array_t * result = dyn_array_import(myPCB, nprocesses, sizeof(ProcessControlBlock_t), NULL);
+    dyn_array_t * result = dyn_array_import(myPCB, nprocesses, sizeof(ProcessControlBlock_t), free);
     if(result == NULL) free(myPCB);
     return result;
 }
