@@ -23,7 +23,6 @@ struct dyn_array
     size_t size;
     const size_t data_size;
     void *array;
-    size_t nprocesses; // Adding nprocesses to easily keep track of the number of processes
     void (*destructor)(void *);
 };
 

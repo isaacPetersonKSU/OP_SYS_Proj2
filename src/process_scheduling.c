@@ -38,50 +38,70 @@ dyn_array_t *load_process_control_blocks(const char *input_file)
         fread(&myPCB[i].priority, sizeof(uint32_t), 1, fp);
         fread(&myPCB[i].arrival, sizeof(uint32_t), 1, fp);
     }
+    fclose(fp);
 
-    return dyn_array_import(myPCB, nprocesses, sizeof(ProcessControlBlock_t), nprocesses, NULL); // Use the given dyn_array_import to create the array of processes to use later
+    return dyn_array_import(myPCB, nprocesses, sizeof(ProcessControlBlock_t), NULL); // Use the given dyn_array_import to create the array of processes to use later
 }
 
 bool first_come_first_serve(dyn_array_t *ready_queue, ScheduleResult_t *result) 
 {
-    // Do error checking
+    if (ready_queue == NULL || result == NULL) return false; // Bad params
+
     ProcessControlBlock_t * PCB = ready_queue->array;
-    size_t nprocesses = ready_queue->nprocesses;
+    size_t nprocesses = ready_queue->size;
     sortpcb_arrival(PCB, nprocesses);
 
     ProcessControlBlock_t next_process;
-
-    size_t turnaround = 0;
-    size_t waiting = 0;
+    
+    size_t waiting = 0, summed_waiting = 0;
+    size_t turnaround = 0, summed_turnaround = 0;
 
     int ticks = 0;
 
-    for (int i = 0; i < ready_queue->nprocesses; i++) {
-        // Do stuff here
+    for (int i = 0; i < nprocesses; i++) {
+
+        if (ready_queue_pop(ready_queue, &next_process) < 0) return false;
+
+        for (; next_process.remaining_burst_time != 0; ticks++) {
+            virtual_cpu(&next_process);
+        }
+
+        waiting = ticks - next_process.arrival;
+        summed_waiting += waiting;
+
+        turnaround = waiting + next_process.remaining_burst_time;
+        summed_turnaround += turnaround;
     }
+
+    result->average_waiting_time = (float)summed_waiting / (float)nprocesses;
+    result->average_turnaround_time = (float)summed_turnaround / (float)nprocesses;
+    result->total_run_time = ticks;
+
+    return true;
 }
 
 bool shortest_job_first(dyn_array_t *ready_queue, ScheduleResult_t *result) 
 {
+    if (ready_queue == NULL || result == NULL) return false; // Bad params
+
     ProcessControlBlock_t * PCB = ready_queue->array;
-    size_t nprocesses = ready_queue->nprocesses;
+    size_t nprocesses = ready_queue->size;
     sortpcb_burst(PCB, nprocesses);
 
     ProcessControlBlock_t next_process;
-
-    size_t turnaround = 0;
-    size_t summed_turnaround = 0;
-    size_t waiting = 0;
+    
+    size_t waiting = 0, summed_waiting = 0;
+    size_t turnaround = 0, summed_turnaround = 0;
 
     int ticks = 0;
 
-    for (int i = 0; ready_queue->nprocesses > 0) {
-        ready_queue_peek(ready_queue, &next_process);
+    for (int i = 0; nprocesses > 0;) {
+        ready_queue_peek(ready_queue, 1, &next_process);
 
-        if (next_process.arrival > ticks) {
+        if ((int)next_process.arrival > ticks) {
             i++;
 
-            if (i == ready_queue->nprocesses) {
+            if (i == (int)ready_queue->size) {
                 i = 0;
             }
 
@@ -91,55 +111,69 @@ bool shortest_job_first(dyn_array_t *ready_queue, ScheduleResult_t *result)
         ready_queue_destroy(ready_queue, i);
         i = 0;
 
-        pcbinfo(&next_process, 1);
-
         for(; next_process.remaining_burst_time != 0; ticks++) {
             virtual_cpu(&next_process);
         }
 
-        turnaround = ticks - next_process.arrival;
-        summed_turnaround += turnaround
-        // Still need to do other calculations here (and outside the loop)
+        waiting = ticks - next_process.arrival;
+        summed_waiting += waiting;
+
+        turnaround = waiting + next_process.remaining_burst_time;
+        summed_turnaround += turnaround;
     }
+
+    result->average_waiting_time = (float)summed_waiting / (float)nprocesses;
+    result->average_turnaround_time = (float)summed_turnaround / (float)nprocesses;
+    result->total_run_time = ticks;
 
     return true;
 }
 
 bool round_robin(dyn_array_t *ready_queue, ScheduleResult_t *result, size_t quantum) 
 {
+    if (ready_queue == NULL || result == NULL || quantum <= 0) return false; // Bad params
+
     ProcessControlBlock_t * PCB = ready_queue->array;
-    size_t nprocesses = ready_queue->nprocesses;
-    sortpcb_arrival(pcb, nprocesses);
+    size_t nprocesses = ready_queue->size;
+    sortpcb_arrival(PCB, nprocesses);
 
     ProcessControlBlock_t next_process;
-
-    size_t turnaround = 0;
-    size_t waiting = 0;
+    
+    size_t waiting = 0, summed_waiting = 0;
+    size_t turnaround = 0, summed_turnaround = 0;
 
     int ticks = 0;
 
-    while (ready_queue->nprocesses > 0) {
-        ready_queue_pop(ready_queue, &next_process);
+    while (nprocesses > 0) {
+
+        if (ready_queue_pop(ready_queue, &next_process) < 0) return false;
 
         for (int i = quantum; i != 0; i--, ticks++) {
 
-            if (ready_queue->arrival < ticks) {
+            if ((int)next_process->arrival < ticks) {
                 virtual_cpu(&next_process);
 
                 if (next_process->remaining_burst_time <= 0) {
                     ticks++;
-                    // Calculate turn around time and waiting time for the current process
+
+                    waiting = ticks - next_process.remaining_burst_time;
+                    summed_waiting += waiting;
+
+                    turnaround = waiting + next_process.remaining_burst_time;
+                    summed_turnaround += turnaround;
+
                     break;
                 }
             }
         }
 
-        pcbinfo(&next_process, 1);
-
         if (next_process->remaining_burst_time > 0) ready_queue_push(ready_queue, &next_process);
     }
 
-    // Calculate all averages
+    result->average_waiting_time = (float)summed_waiting / (float)nprocesses;
+    result->average_turnaround_time = (float)summed_turnaround / (float)nprocesses;
+    result->total_run_time = ticks;
+
     return true;
 }
 

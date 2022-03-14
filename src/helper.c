@@ -51,10 +51,10 @@ int ready_queue_pop(dyn_array_t * ready_queue, ProcessControlBlock_t * target)
     ProcessControlBlock_t * pcb = (ProcessControlBlock_t *) (ready_queue->array);
     
     memcpy(target, pcb, sizeof(ProcessControlBlock_t));
-    ready_queue->nprocesses =  ready_queue->nprocesses - 1;
+    ready_queue->size =  ready_queue->size - 1;
     
     /* Shift all the elements */
-    for(size_t i = 0; i < ready_queue->nprocesses; i++)
+    for(size_t i = 0; i < ready_queue->size; i++)
     {
         *pcb = *(pcb+1);
         pcb++;
@@ -68,9 +68,9 @@ int ready_queue_push(dyn_array_t * ready_queue, ProcessControlBlock_t * src)
     ProcessControlBlock_t *pcb = (ProcessControlBlock_t *) (ready_queue->array);
     
     /* Add the element to the tail of the queue */
-    pcb += ready_queue->nprocesses;
+    pcb += ready_queue->size;
     memcpy(pcb, src, sizeof(ProcessControlBlock_t));
-    ready_queue->nprocesses =  ready_queue->nprocesses +1;
+    ready_queue->size =  ready_queue->size +1;
     
     return 0;
 }
@@ -89,10 +89,10 @@ int ready_queue_destroy(dyn_array_t * ready_queue, uint32_t i)
     ProcessControlBlock_t * pcb = (ProcessControlBlock_t *) (ready_queue->array);
     
     pcb = pcb+i;
-    ready_queue->nprocesses =  ready_queue->nprocesses - 1;
+    ready_queue->size =  ready_queue->size - 1;
     
     /* Shift all the elements */
-    for(size_t j = (size_t)i; j < ready_queue->nprocesses; j++)
+    for(size_t j = (size_t)i; j < ready_queue->size; j++)
     {
         *pcb = *(pcb+1);
         pcb++;
