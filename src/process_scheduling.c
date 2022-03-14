@@ -102,23 +102,26 @@ bool shortest_job_first(dyn_array_t *ready_queue, ScheduleResult_t *result)
 
     ProcessControlBlock_t curr_process;
     uint32_t tick = 0, total_wait = 0, total_turn_around = 0, wait = 0;
-    uint32_t j, burst_time;
+    uint32_t i, burst_time;
     while(!dyn_array_empty(ready_queue)){
         if (!dyn_array_extract_front(ready_queue, &curr_process)) return false;
 
         // sorts by arrival and takes next in arrival
-        if (tick > curr_process.arrival){
-            dyn_array_push_front(ready_queue, &curr_process);
+        if (tick < curr_process.arrival){
+            dyn_array_push_back(ready_queue, &curr_process);
             dyn_array_sort(ready_queue, sort_arrival);
             if (!dyn_array_extract_front(ready_queue, &curr_process)) return false;
             dyn_array_sort(ready_queue, sort_burst_time);
         }
 
         wait = tick - curr_process.arrival;
+        printf("wait: %d\n", wait);
         total_wait += wait;
         burst_time = curr_process.remaining_burst_time;
+        printf("burst time: %d\n", burst_time);
         total_turn_around += wait + burst_time;
-        for(j = 0; j < burst_time; j++){
+
+        for(i = 0; i < burst_time; i++){
             virtual_cpu(&curr_process);
             tick++;
         }
@@ -231,7 +234,7 @@ bool shortest_remaining_time_first(dyn_array_t *ready_queue, ScheduleResult_t *r
         if (!dyn_array_extract_front(ready_queue, &curr_process)) return false;
 
         // sorts by arrival and takes next in arrival
-        if (tick > curr_process.arrival){
+        if (tick < curr_process.arrival){
             dyn_array_push_front(ready_queue, &curr_process);
             dyn_array_sort(ready_queue, sort_arrival);
             if (!dyn_array_extract_front(ready_queue, &curr_process)) return false;
@@ -239,8 +242,10 @@ bool shortest_remaining_time_first(dyn_array_t *ready_queue, ScheduleResult_t *r
         }
 
         wait = tick - curr_process.arrival;
+        printf("wait time: %d\n", wait);
         total_wait += wait;
         burst_time = curr_process.remaining_burst_time;
+        printf("burst time: %d\n", burst_time);
         total_turn_around += wait + burst_time;
 
         next_process = dyn_array_front(ready_queue);
@@ -251,12 +256,14 @@ bool shortest_remaining_time_first(dyn_array_t *ready_queue, ScheduleResult_t *r
             
             if (next_process->remaining_burst_time < burst_time && next_process->remaining_burst_time < burst_time){
                 curr_process.arrival = tick;
+                total_turn_around -= burst_time - curr_process.remaining_burst_time;
                 dyn_array_push_front(ready_queue, &curr_process);
                 dyn_array_sort(ready_queue, sort_burst_time);
                 break;
             }
         }
     }
+    total_turn_around = total_wait + tick;
 
     result->total_run_time = tick;
     result->average_waiting_time = (float) total_wait / (float) nprocs;
